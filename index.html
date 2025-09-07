@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>فيروس الحماي — واجهة الحماية</title>
+<style>
+  :root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --accent:#23c78a;
+    --danger:#ff4d4d;
+    --muted:#9aa6b2;
+  }
+  html,body{height:100%;margin:0;font-family:Inter, "Segoe UI", Tahoma, Arial; background:linear-gradient(180deg,#031021 0%, #071026 100%); color:#e6eef6; display:flex; align-items:center; justify-content:center;}
+  .wrap{width:960px; max-width:95%; display:grid; grid-template-columns:360px 1fr; gap:24px; align-items:start;}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border-radius:12px; padding:20px; box-shadow:0 8px 30px rgba(2,6,23,0.6);}
+  .left{display:flex;flex-direction:column;gap:18px; align-items:center;}
+  .virus-badge{width:220px;height:220px;display:flex;align-items:center;justify-content:center;border-radius:50%; background:radial-gradient(circle at 30% 20%, rgba(35,199,138,0.18), transparent 30%), linear-gradient(145deg,#071122,#0a1b2a); box-shadow:0 12px 30px rgba(3,12,24,0.6); position:relative; overflow:visible;}
+  svg{width:140px;height:140px; filter:drop-shadow(0 8px 20px rgba(35,199,138,0.12));}
+  .name{font-size:20px;font-weight:700;color:var(--accent); text-align:center;}
+  .subtitle{font-size:13px;color:var(--muted); text-align:center;}
+  .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600;}
+  .btn-scan{background:linear-gradient(90deg,var(--accent),#1fb37d); color:#021014;}
+  .btn-iso{background:var(--danger); color:white;}
+  .info{font-size:13px;color:var(--muted); text-align:center;}
+  .right{display:flex;flex-direction:column;gap:12px;}
+  .row{display:flex;gap:12px;align-items:center;}
+  .stat{flex:1;background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;}
+  .log{background:#02111a;padding:12px;border-radius:8px;height:220px; overflow:auto; font-family:monospace; font-size:13px; color:#bfeadf;}
+  .small{font-size:12px;color:var(--muted);}
+  .link{color:var(--accent); text-decoration:none;}
+  .spinner{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,0.06);border-top-color:var(--accent); animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  footer{grid-column:1/-1; text-align:center; color:var(--muted); margin-top:6px; font-size:12px;}
+  /* cute micro spikes for virus look */
+  .spike{position:absolute; width:14px;height:40px; left:50%; top:6%; transform-origin:center bottom; background:linear-gradient(180deg, #2be39f, #087056); border-radius:8px; box-shadow:0 6px 12px rgba(3,12,24,0.6);}
+  /* positions */
+  .s1{transform:translate(-50%,-8%) rotate(0deg); left:50%;}
+  .s2{transform:translate(-50%,-8%) rotate(60deg); left:75%;}
+  .s3{transform:translate(-50%,-8%) rotate(-60deg); left:25%;}
+  .s4{top:85%; height:36px; transform:translate(-50%,0) rotate(180deg);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card left">
+    <div class="virus-badge" id="badge">
+      <!-- decorative spikes -->
+      <div class="spike s1"></div>
+      <div class="spike s2"></div>
+      <div class="spike s3"></div>
+      <div class="spike s4"></div>
+
+      <!-- inline SVG looks like virus -->
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden>
+        <circle cx="12" cy="12" r="5.2" stroke="url(#g1)" stroke-width="1.6" fill="rgba(35,199,138,0.06)"/>
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1">
+            <stop offset="0" stop-color="#2be39f"/>
+            <stop offset="1" stop-color="#06a56b"/>
+          </linearGradient>
+        </defs>
+        <!-- inner core -->
+        <g stroke="url(#g1)" stroke-width="1.2" stroke-linecap="round">
+          <path d="M12 6v-2M12 20v-2M6 12H4M20 12h-2M17 7l1.4-1.4M5.6 18.4 7 17M17 17l1.4 1.4M5.6 5.6 7 7"/>
+        </g>
+      </svg>
+    </div>
+
+    <div style="height:8px"></div>
+    <div class="name" id="appName">فيروس الحماي</div>
+    <div class="subtitle">واجهة حماية مرحة — تحمي جهازك وتعلمك أساسيات الأمان</div>
+
+    <div style="height:12px"></div>
+
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-scan" id="scanBtn">🔎 فحص الآن</button>
+      <button class="btn btn-iso" id="isoBtn">🛡️ عزل ملف</button>
+    </div>
+
+    <div style="height:10px"></div>
+    <div class="info">ملاحظة: هذه صفحة واجهة. للتفعيل الحقيقي، شغّل سكربت الحماية على جهازك (Python).</div>
+  </div>
+
+  <div class="card right">
+    <div class="row">
+      <div class="stat">
+        <div class="small">حالة الحماية</div>
+        <div id="status" style="font-weight:700; margin-top:6px; color:var(--accent)">آمنة ✔</div>
+      </div>
+
+      <div class="stat">
+        <div class="small">آخر فحص</div>
+        <div id="last" style="font-weight:700; margin-top:6px">لم يتم الفحص</div>
+      </div>
+    </div>
+
+    <div style="height:8px"></div>
+
+    <div class="small">سجل الأحداث</div>
+    <div class="log" id="logArea">
+      [نظام] واجهة تشغيل: جاهزة.<br/>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div style="display:flex;gap:10px;">
+      <button class="btn" id="downloadLog">تنزيل السجل</button>
+      <button class="btn" id="connectLocal">الاتصال بالخدمة المحلية</button>
+      <div style="flex:1"></div>
+      <div class="small">مصدر الصورة: أيقونة SVG مدمجة</div>
+    </div>
+
+    <div style="height:8px"></div>
+
+    <div class="small">روابط مفيدة:</div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <a class="link" href="https://support.microsoft.com" target="_blank">دعم ويندوز</a> ·
+      <a class="link" href="https://www.av-test.org" target="_blank">معلومات عن مضادات الفيروسات</a>
+    </div>
+  </div>
+
+  <footer class="small">⚠️ لا تقم بتشغيل أدوات الحماية على أجهزة غير مرخّص بها — استخدمها للتعليم وحماية جهازك فقط.</footer>
+</div>
+
+<script>
+  const logArea = document.getElementById('logArea');
+  const statusEl = document.getElementById('status');
+  const lastEl = document.getElementById('last');
+  const scanBtn = document.getElementById('scanBtn');
+  const isoBtn = document.getElementById('isoBtn');
+  const downloadLog = document.getElementById('downloadLog');
+  const connectLocal = document.getElementById('connectLocal');
+
+  function addLog(txt){
+    const time = new Date().toLocaleString('ar-EG');
+    logArea.innerHTML = `[${time}] ${txt}<br/>` + logArea.innerHTML;
+  }
+
+  // محاكاة فحص — يمكن ربطها بخدمة محلية لاحقاً
+  scanBtn.addEventListener('click', async ()=>{
+    scanBtn.disabled = true;
+    const spinner = document.createElement('span');
+    spinner.className = 'spinner';
+    scanBtn.textContent = 'جاري الفحص ';
+    scanBtn.appendChild(spinner);
+    addLog('بدء فحص سريع...');
+    // محاكاة مدة الفحص
+    await new Promise(r => setTimeout(r, 2200));
+    // نتيجة عشوائية تعليمية
+    const safe = Math.random() > 0.18;
+    if(safe){
+      statusEl.textContent = 'آمنة ✔';
+      statusEl.style.color = 'var(--accent)';
+      addLog('لا ملفات مشبوهة مكتشفة.');
+    } else {
+      statusEl.textContent = 'مشتبه ⚠';
+      statusEl.style.color = 'var(--danger)';
+      addLog('اكتُشف ملف مشتبه — اقترح عزله في مجلد Quarantine.');
+    }
+    lastEl.textContent = new Date().toLocaleString('ar-EG');
+    scanBtn.textContent = '🔎 فحص الآن';
+    scanBtn.disabled = false;
+  });
+
+  // زر عزل — هنا فقط يحفظ سجل أو يرسل طلب للخادم المحلي
+  isoBtn.addEventListener('click', ()=>{
+    const filename = prompt('اكتب اسم الملف اللي تبي تعزله (مثلاً: evil.exe) أو اتركه للاختبار:','suspicious.exe');
+    if(!filename) return;
+    addLog(`أمر العزل مُرسل للملف: ${filename} (محاكاة)`);
+    alert('تمت إضافة الطلب لعزل الملف (محاكاة). لتفعيل حقيقي شغّل خدمة الحماية المحلية.');
+  });
+
+  // تنزيل السجل كملف نصي
+  downloadLog.addEventListener('click', ()=>{
+    const text = logArea.innerText;
+    const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'virus_guard_log.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // محاولة الاتصال بخدمة محلية على جهازك (مثلاً Flask أو أي API)
+  connectLocal.addEventListener('click', async ()=>{
+    addLog('محاولة الاتصال بالخدمة المحلية...');
+    try{
+      const res = await fetch('http://127.0.0.1:5000/health', {method:'GET'});
+      if(res.ok){
+        const data = await res.text();
+        addLog('الخدمة المحلية مستجيبة: ' + data);
+        alert('الخدمة المحلية مستجيبة — يمكنك ربط الفحص الحقيقي.');
+      } else {
+        addLog('الخدمة المحلية ردت بحالة: ' + res.status);
+        alert('لا يوجد خدمة محلية على المنفذ 5000.');
+      }
+    }catch(e){
+      addLog('فشل الاتصال بالخدمة المحلية: ' + e.message);
+      alert('ما في خدمة محلية شغالة على 127.0.0.1:5000');
+    }
+  });
+
+  // بداية
+  addLog('واجهة فيروس الحماي جاهزة.');
+</script>
+</body><a href="https://youtube.com" target="_blank">اذهب إلى يوتيوب</a>
+<title>فيروس الحماية 🛡️</title>
+<a href="https://youtube.com" target="_blank">فيروس الحماية</a>
+<h1>أهلاً بك في فيروس الحماية 👾</h1>
+<p>هذا مجرد موقع للتجربة.</p>
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>فيروس الحماية 🛡️</title>
+</head>
+<body>
+  <h1>أهلاً بك في فيروس الحماية 👾</h1>
+  <p>اضغط على الرابط للتجربة:</p>
+
+  <a href="https://youtube.com" target="_blank">اذهب إلى يوتيوب</a>
+</body>
+</html>
+
+</html>
